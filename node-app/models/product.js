@@ -16,6 +16,11 @@ const productSchema = new Schema(
       type: String,
       required: true,
     },
+    customer: {
+      type: Schema.Types.ObjectId,
+      ref: "Customer",
+      required: true,
+    },
     status: {
       type: String,
       required: true,

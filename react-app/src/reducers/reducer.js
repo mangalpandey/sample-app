@@ -1,4 +1,4 @@
-import { ACCESS_TOKEN, API_BASE_URL, EMAIL } from "../constants/config";
+import { ACCESS_TOKEN, API_BASE_URL, EMAIL, ID } from "../constants/config";
 
 const LOGIN_IN_PROCESS = "LOGIN_IN_PROCESS";
 const LOGIN_SUCCESS = "LOGIN_SUCCESS";
@@ -6,8 +6,8 @@ const LOGIN_ERROR = "LOGIN_ERROR";
 const SIGNUP_IN_PROCESS = "SIGNUP_IN_PROCESS";
 const SIGNUP_SUCCESS = "SIGNUP_SUCCESS";
 const SIGNUP_ERROR = "SIGNUP_ERROR";
-const PRODUCT_ADDING = "PRODUCT_ADDING";
-const PRODUCT_ADDED = "PRODUCT_ADDED ";
+const PRODUCT_PURCHASING = "PRODUCT_PURCHASING";
+const PRODUCT_PURCHASED = "PRODUCT_PURCHASED ";
 const PRODUCT_DATA = "PRODUCT_DATA";
 const CUSTOMER_DATA = "CUSTOMER_DATA";
 
@@ -19,8 +19,8 @@ const intialState = {
   isLoginSuccess: false,
   loginError: null,
   customer: null,
-  isProductAdding: false,
-  isProductAdded: false,
+  isProductPurchasing: false,
+  isProductPurchased: false,
   productsData: null,
 };
 
@@ -77,16 +77,16 @@ function setProductData(productsData) {
   };
 }
 
-function setProductAdding(isProductAdding) {
+function setProductPurchasing(isProductPurchasing) {
   return {
-    type: PRODUCT_ADDING,
-    isProductAdding,
+    type: PRODUCT_PURCHASING,
+    isProductPurchasing,
   };
 }
-function setProductAdded(isProductAdded) {
+function setProductPurchased(isProductPurchased) {
   return {
-    type: PRODUCT_ADDED,
-    isProductAdded,
+    type: PRODUCT_PURCHASED,
+    isProductPurchased,
   };
 }
 export function udateStatus() {
@@ -178,15 +178,17 @@ function saveToLocalStorage(data) {
   if (data && data.token) {
     localStorage.setItem(ACCESS_TOKEN, data.token);
     localStorage.setItem(EMAIL, data.email);
+    localStorage.setItem(ID, data._id);
   } else {
     localStorage.setItem(ACCESS_TOKEN, "");
     localStorage.setItem(EMAIL, "");
+    localStorage.setItem(ID, "");
   }
 }
-export function addProduct(name, price, shopName, status) {
+export function purchaseProduct(name, price, shopName, status) {
   return (dispatch) => {
-    dispatch(setProductAdding(true));
-    fetch(API_BASE_URL + "/product/add", {
+    dispatch(setProductPurchasing(true));
+    fetch(API_BASE_URL + "/product/purchase", {
       method: "POST",
       headers: {
         "Content-type": "application/json; charset=UTF-8",
@@ -197,17 +199,18 @@ export function addProduct(name, price, shopName, status) {
         price: price,
         shopName: shopName,
         status: status,
+        userId: localStorage.getItem(ID),
       }),
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("product added", data);
-        dispatch(setProductAdded(true));
-        dispatch(setProductAdding(false));
+        console.log("product purchase", data);
+        dispatch(setProductPurchased(true));
+        dispatch(setProductPurchasing(false));
       })
       .catch((err) => {
-        dispatch(setProductAdded(false));
-        dispatch(setProductAdding(false));
+        dispatch(setProductPurchased(false));
+        dispatch(setProductPurchasing(false));
       });
   };
 }
@@ -240,13 +243,20 @@ export function customerData() {
 
 export function getAllProducts(searchText) {
   return (dispatch) => {
-    fetch(API_BASE_URL + "/product/getAll?searchText=" + searchText, {
-      method: "GET",
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-        Authorization: "Bearer " + localStorage.getItem(ACCESS_TOKEN),
-      },
-    })
+    fetch(
+      API_BASE_URL +
+        "/product/getAll?searchText=" +
+        searchText +
+        "&userId=" +
+        localStorage.getItem(ID),
+      {
+        method: "GET",
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+          Authorization: "Bearer " + localStorage.getItem(ACCESS_TOKEN),
+        },
+      }
+    )
       .then((res) => res.json())
       .then((data) => {
         if (data) {
@@ -298,15 +308,15 @@ export default function reducer(state = intialState, action) {
         ...state,
         customer: action.customer,
       };
-    case PRODUCT_ADDING:
+    case PRODUCT_PURCHASING:
       return {
         ...state,
-        isProductAdding: action.isProductAdding,
+        isProductPurchasing: action.isProductPurchasing,
       };
-    case PRODUCT_ADDED:
+    case PRODUCT_PURCHASED:
       return {
         ...state,
-        isProductAdded: action.isProductAdded,
+        isProductPurchased: action.isProductPurchased,
       };
     case PRODUCT_DATA:
       return {

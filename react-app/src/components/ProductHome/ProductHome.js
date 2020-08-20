@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import {
   customerData,
-  addProduct,
+  purchaseProduct,
   getAllProducts,
 } from "../../reducers/reducer";
 import "./ProductHome.css";
@@ -30,7 +30,12 @@ function ProductHome(props) {
 
   const handleSubmitClick = (e) => {
     e.preventDefault();
-    props.addProduct(state.name, state.price, state.shopName, state.status);
+    props.purchaseProduct(
+      state.name,
+      state.price,
+      state.shopName,
+      state.status
+    );
   };
 
   useEffect(() => {
@@ -40,8 +45,8 @@ function ProductHome(props) {
     } else if (!props.customer) {
       props.customerData();
     }
-    console.log("props.isProductAdded", props.isProductAdded);
-    if (props.isProductAdded) {
+    console.log("props.isProductPurchased", props.isProductPurchased);
+    if (props.isProductPurchased) {
       setState({
         name: "",
         price: "",
@@ -49,7 +54,7 @@ function ProductHome(props) {
         status: "",
       });
     }
-  }, [props.customer, props.isProductAdded, props.isProductAdding]);
+  }, [props.customer, props.isProductPurchased, props.isProductPurchasing]);
 
   function redirectToLogin() {
     props.history.push("/login");
@@ -151,9 +156,9 @@ function ProductHome(props) {
                 type="button"
                 className="btn btn-success"
                 onClick={handleSubmitClick}
-                disabled={props.isProductAdding}
+                disabled={props.isProductPurchasing}
               >
-                Submit
+                Purchase
               </button>
             </form>
           </div>
@@ -166,8 +171,8 @@ function ProductHome(props) {
 const mapStateToProps = (state) => {
   return {
     customer: state.customer,
-    isProductAdding: state.isProductAdding,
-    isProductAdded: state.isProductAdded,
+    isProductPurchasing: state.isProductPurchasing,
+    isProductPurchased: state.isProductPurchased,
     productsData: state.productsData,
   };
 };
@@ -176,8 +181,8 @@ const mapDispatchToProps = (dispatch) => {
   return {
     getAllProducts: (searchText) => dispatch(getAllProducts(searchText)),
     customerData: () => dispatch(customerData()),
-    addProduct: (name, price, shopName, status) =>
-      dispatch(addProduct(name, price, shopName, status)),
+    purchaseProduct: (name, price, shopName, status) =>
+      dispatch(purchaseProduct(name, price, shopName, status)),
   };
 };
 

@@ -4,18 +4,6 @@ const Schema = mongoose.Schema;
 
 const transactionSchema = new Schema(
   {
-    name: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      required: true,
-    },
-    password: {
-      type: String,
-      required: true,
-    },
     product: {
       type: Schema.Types.ObjectId,
       ref: "Product",
